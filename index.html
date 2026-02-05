@@ -15,6 +15,12 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    transition: background 1.5s ease;
+  }
+
+  /* 💖 Romantic background AFTER YES */
+  body.romantic {
+    background: radial-gradient(circle at top, #ff6f91, #ff2e63, #6a001f);
   }
 
   .container {
@@ -54,6 +60,25 @@
     position: absolute;
   }
 
+  /* 💌 Romantic quote */
+  .quote {
+    position: fixed;
+    bottom: 15%;
+    width: 100%;
+    text-align: center;
+    font-size: 2rem;
+    color: #fff;
+    opacity: 0;
+    animation: fadeIn 2s ease forwards;
+    text-shadow: 0 0 20px rgba(255,255,255,0.6);
+    padding: 0 20px;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
   .heart {
     position: absolute;
     font-size: 22px;
@@ -91,7 +116,6 @@
 
 <div class="container" id="container">
   <h1 id="question">Will you be my Valentine? 💝</h1>
-
   <button id="yesBtn">YES 💖</button>
   <button id="noBtn">No 🙃</button>
 </div>
@@ -103,22 +127,29 @@
   const music = document.getElementById("music");
   const question = document.getElementById("question");
 
-  /* 🔤 NAME FROM URL (supports spaces & emojis) */
+  /* 🔤 Name from URL */
   const params = new URLSearchParams(window.location.search);
-  let name = params.get("name");
+  const name = params.get("name");
+  question.innerText = `${name ? decodeURIComponent(name) : "Hey you"}, will you be my Valentine? 💝`;
 
-  if (name) {
-    name = decodeURIComponent(name);
-  } else {
-    name = "Hey you";
-  }
-
-  question.innerText = `${name}, will you be my Valentine? 💝`;
+  /* 💌 Romantic quotes */
+  const quotes = [
+    "I found my forever the moment I found you 💖",
+    "Every love story is beautiful, but ours is my favorite ✨",
+    "With you, everything feels right 💕",
+    "You are my today, tomorrow, and always ❤️",
+    "I didn’t choose you, my heart did 💘",
+    "In a world full of chaos, you are my calm 🌹",
+    "If love had a face, it would look like you 😍"
+  ];
 
   let scale = 1;
   let escapes = 0;
+  let yesClicked = false;
 
   function moveNo() {
+    if (yesClicked) return;
+
     escapes++;
 
     const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
@@ -147,23 +178,39 @@
   noBtn.addEventListener("touchstart", moveNo);
 
   yesBtn.addEventListener("click", () => {
+    yesClicked = true;
+
+    // 🔒 Stop scaling forever
+    yesBtn.style.transform = "none";
+
     music.play();
 
     if (navigator.vibrate) {
       navigator.vibrate([200, 100, 200, 100, 400]);
     }
 
-    container.remove();
+    // 💖 Romantic glow
+    document.body.classList.add("romantic");
 
+    container.remove();
+    noBtn.remove();
+
+    // 💥 Full screen YES
     yesBtn.style.position = "fixed";
-    yesBtn.style.top = 0;
-    yesBtn.style.left = 0;
+    yesBtn.style.top = "0";
+    yesBtn.style.left = "0";
     yesBtn.style.width = "100vw";
     yesBtn.style.height = "100vh";
     yesBtn.style.fontSize = "4rem";
+    yesBtn.style.borderRadius = "0";
     yesBtn.innerText = "YAHHHHH!!! 💘🎉😍";
-
     document.body.appendChild(yesBtn);
+
+    // 💌 Show random quote
+    const quote = document.createElement("div");
+    quote.className = "quote";
+    quote.innerText = quotes[Math.floor(Math.random() * quotes.length)];
+    document.body.appendChild(quote);
 
     launchConfetti();
     launchFireworks();
