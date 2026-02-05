@@ -73,9 +73,12 @@
     }
   }
 
-  .fade {
-    opacity: 0;
-    transition: opacity 1.5s ease;
+  @keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
   }
 </style>
 </head>
@@ -100,9 +103,16 @@
   const music = document.getElementById("music");
   const question = document.getElementById("question");
 
-  /* 🔤 Name from URL */
+  /* 🔤 NAME FROM URL (supports spaces & emojis) */
   const params = new URLSearchParams(window.location.search);
-  const name = params.get("name") || "Hey you";
+  let name = params.get("name");
+
+  if (name) {
+    name = decodeURIComponent(name);
+  } else {
+    name = "Hey you";
+  }
+
   question.innerText = `${name}, will you be my Valentine? 💝`;
 
   let scale = 1;
@@ -116,13 +126,20 @@
     noBtn.style.left = `${x}px`;
     noBtn.style.top = `${y}px`;
 
-    scale += 0.25;
+    scale += 0.15;
     yesBtn.style.transform = `scale(${scale})`;
 
-    if (escapes > 5) {
-      noBtn.innerText = "okay… 😭";
-      noBtn.classList.add("fade");
-      setTimeout(() => noBtn.remove(), 1500);
+    if (escapes === 10) {
+      noBtn.innerText = "wait… 😭";
+    }
+
+    if (escapes > 12) {
+      noBtn.style.animation = "shake 0.5s infinite";
+      setTimeout(() => {
+        noBtn.style.transition = "opacity 3s ease";
+        noBtn.style.opacity = "0";
+        setTimeout(() => noBtn.remove(), 3000);
+      }, 1000);
     }
   }
 
@@ -132,7 +149,6 @@
   yesBtn.addEventListener("click", () => {
     music.play();
 
-    // 📳 Mobile vibration
     if (navigator.vibrate) {
       navigator.vibrate([200, 100, 200, 100, 400]);
     }
@@ -188,7 +204,7 @@
       fire.style.left = Math.random() * 100 + "vw";
       fire.style.top = Math.random() * 100 + "vh";
       fire.style.fontSize = "30px";
-      fire.style.animation = "pop 1s ease-out";
+      fire.style.animation = "floatUp 1s ease-out";
       document.body.appendChild(fire);
       setTimeout(() => fire.remove(), 1000);
     }
